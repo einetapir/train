@@ -13,5 +13,5 @@ predictor = LinearRegression(n_jobs=-1)
 predictor.fit(X=TRAIN_INPUT, y=TRAIN_OUTPUT)
 
 print(f'Respect + : {predictor.coef_}')
-with open('model/model.json', 'w') as f:
+with open('model.json', 'w') as f:
     f.write(dumps(predictor.coef_.tolist()))
