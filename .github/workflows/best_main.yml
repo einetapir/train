@@ -67,7 +67,7 @@ jobs:
 # On obtient donc un fichier model.json que l'on va 
       
       - name: Docker cp # ici on copie le fichier json dans le contener docker train
-        run: docker cp train:model.json .
+        run: docker cp einetapir/train:model.json .
       
 # ici on cré une image (build) model en prenant le fichier model (voir param context)     
       - name: Build model image and push to Docker Hub
