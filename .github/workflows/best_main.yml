@@ -1,36 +1,82 @@
-# This is a basic workflow to help you get started with Actions
+name: Get data, train and push model
 
-name: CI
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
+  # run it on push to the default repository branch
   push:
-    branches: [ main ]
+    branches: [main]
+  # run it during pull request
   pull_request:
-    branches: [ main ]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  # define job to build and publish docker image
+  build-and-push-docker-image:
+    name: Build Docker image and push to repositories
+    # run only when code is compiling and tests are passing
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    # steps to perform in job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+      # setup Docker build action
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: einetapir
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: Set outputs
+        id: vars
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+        
+      - name: Check outputs
+        run: echo ${{ steps.vars.outputs.sha_short }}
+      
+      - name: Build image and push to Docker Hub and GitHub Container Registry
+        uses: docker/build-push-action@v2
+        with:
+          # relative path to the place where source code with Dockerfile is located
+          context: .
+          push: true # ${{ github.ref == 'refs/heads/main' }}
+          # Note: tags has to be all lower-case 
+          # name/nom_du_action
+          # tags prend le nom du repo (plus localisation einetapir)
+          tags: |
+            einetapir/train:latest  
+            einetapir/train:${{ steps.vars.outputs.sha_short }}
+          # build on feature branches, push only on main branch
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
+
+      - name: Volume create
+        run: docker volume create shared # creation du volume shared pour passer le dataset du contenair data
+
+      - name: Run dataset # on join le volume au dataset en lançant le contener dataset
+        run: docker run --name dataset -v shared:/data einetapir/dataset
+
+      - name: Run train # on apporte le volume au train dataset (dans le dossier data) en lançant le contener train
+        run: docker run --name train -v shared:/data einrtapir/train
+
+# ici on vient de faire tourner le train.py grace au dockerfile ds le repo train
+# On obtient donc un fichier model.json que l'on va 
+      
+      - name: Docker cp # ici on copie le fichier json dans le contener docker train
+        run: docker cp train:data/model.json ./model
+      
+# ici on cré une image (build) model en prenant le fichier model (voir param context)     
+      - name: Build model image and push to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          context: ./model
+          push: true
+          tags: |
+            etienne/model:latest
+            etienne/model:${{ steps.vars.outputs.sha_short }}
+      - name: ECHO
+        run: echo ${{ inputs.sha }}

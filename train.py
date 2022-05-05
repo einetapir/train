@@ -2,11 +2,11 @@ from sklearn.linear_model import LinearRegression
 from json import loads, dumps
 import pickle
 
-with open('/data/indata.json', 'r') as f:
+with open('/indata.json', 'r') as f:
     content = f.read()
     TRAIN_INPUT = loads(content)
 
-with open('/data/outdata.json', 'r') as f:
+with open('/outdata.json', 'r') as f:
     content = f.read()
     TRAIN_OUTPUT = loads(content)
 
