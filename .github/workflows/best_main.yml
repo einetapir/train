@@ -61,7 +61,7 @@ jobs:
         run: docker run --name dataset -v shared:/data einetapir/dataset
 
       - name: Run train # on apporte le volume au train dataset (dans le dossier data) en lançant le contener train
-        run: docker run --name train -v shared:/data einrtapir/train
+        run: docker run --name train -v shared:/data einetapir/train
 
 # ici on vient de faire tourner le train.py grace au dockerfile ds le repo train
 # On obtient donc un fichier model.json que l'on va 
