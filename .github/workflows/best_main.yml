@@ -5,7 +5,7 @@ on:
   push:
     branches: [main]
   # run it during pull request
-  pull_request:
+  repository_dispatch:
 
 jobs:
   # define job to build and publish docker image
@@ -81,3 +81,13 @@ jobs:
             einetapir/model:${{ steps.vars.outputs.sha_short }}
       - name: ECHO
         run: echo ${{ inputs.sha }}
+
+
+      - name: Trigger API
+      run: |
+        curl -H "Authorization: token ${{ secrets.WF_TOKEN }}" \
+        -H 'Accept: application/vnd.github.everest-preview+json' \
+        "https://api.github.com/repos/einetapir/api/dispatches" \
+        -d '{"event_type": "new_model_${{ steps.vars.outputs.sha_short }}", "client_payload": {"model_commit_id": "${{ steps.vars.outputs.sha_short }}"}}'
+
+
