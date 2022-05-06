@@ -66,7 +66,7 @@ jobs:
 # ici on vient de faire tourner le train.py grace au dockerfile ds le repo train
 # On obtient donc un fichier model.json que l'on va 
       
-      - name: Docker cp # ici on copie le fichier json dans le contener docker train
+      - name: Docker cp # ici on copie le fichier model.json dans le contener docker train
         run: docker cp train:/data/model.json .
       
 # ici on cré une image (build) model en prenant le fichier model (voir param context)     
