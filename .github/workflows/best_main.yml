@@ -68,12 +68,6 @@ jobs:
       
       - name: Docker cp # ici on copie le fichier model.json dans le contener docker train
         run: docker cp train:/data/model.json ./model
-
-      - name: cmd ls # ici on copie le fichier model.json dans le contener docker train
-        run: ls
-
-      - name: cmd ls model # ici on copie le fichier model.json dans le contener docker train
-        run: ls /model/
       
 # ici on cré une image (build) model en prenant le fichier model (voir param context)     
       - name: Build model image and push to Docker Hub
