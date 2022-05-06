@@ -1,2 +1,2 @@
 FROM ubuntu
-COPY data/model.json ./model.json
+COPY model.json ./model.json
